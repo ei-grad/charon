@@ -1,7 +1,7 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 import logging
-from gzip import decompress
 from functools import partial
 import http.client
 
@@ -9,8 +9,7 @@ from tornado.httputil import HTTPHeaders
 
 HTTPHeaders._normalize_name = lambda x: x
 
-from tornado import httpserver, httpclient, httputil, ioloop
-from tornado.util import b
+from tornado import httpserver, httpclient, ioloop
 
 
 def httprequest_repr(self):
