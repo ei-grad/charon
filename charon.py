@@ -5,13 +5,12 @@ import re
 import http.client
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
 from tornado.httputil import HTTPHeaders
 from tornado import httpserver, httpclient, ioloop
 from tornado.options import define, options, parse_command_line
 
 
+logger = logging.getLogger(__name__)
 
 define("port", default=8888, help="run on the given port", type=int)
 
@@ -56,7 +55,7 @@ class DefaultHandler:
 
         url = request.protocol + '://' + request.host + '/' + clean_uri(request)
 
-        logging.info("%d - got request - %s %s", id(self), request.method, url)
+        logger.info("%d - got request - %s %s", id(self), request.method, url)
 
         headers = HTTPHeaders()
 
@@ -72,13 +71,13 @@ class DefaultHandler:
             connect_timeout=600.
         )
 
-        logging.debug("Sending request: %s", req)
+        logger.debug("Sending request: %s", req)
 
         fetch(req, callback=self.on_fetch)
 
     def on_fetch(self, response):
 
-        logging.debug("Got response: %s", response)
+        logger.debug("Got response: %s", response)
 
         self.response = response
 
@@ -88,7 +87,7 @@ class DefaultHandler:
         else:
             self.request.write(self.compose_response())
         self.request.finish()
-        logging.info("%d - finished request", id(self))
+        logger.info("%d - finished request", id(self))
 
     def compose_response(self):
 
@@ -146,7 +145,7 @@ except ImportError:
 
 
 def handle_request(request):
-    logging.debug("Got request: %s", request)
+    logger.debug("Got request: %s", request)
     for rule in rules:
         if rule.check(request):
             rule.handler(request)
