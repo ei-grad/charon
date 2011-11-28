@@ -112,7 +112,7 @@ class DefaultHandler:
         if isinstance(self.response.body, bytes):
             return head + self.response.body
         else:
-            print("Fuck!")
+            assert self.response.body is None
             return head
 
 
