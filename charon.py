@@ -33,9 +33,6 @@ ignored_headers = set([
     "Vary",
 ])
 
-replace_headers = {
-    #'Connection': 'close',
-}
 
 def clean_uri(request):
     proxy_uri_prefix = 'http://' + request.host + '/'
