@@ -51,6 +51,8 @@ class DefaultHandler:
 
         url = request.protocol + '://' + request.host + '/' + clean_uri(request)
 
+        logging.info("%d - got request - %s %s", id(self), request.method, url)
+
         headers = HTTPHeaders()
 
         for i in request.headers.keys():
@@ -81,6 +83,7 @@ class DefaultHandler:
         else:
             self.request.write(self.compose_response())
         self.request.finish()
+        logging.info("%d - finished request", id(self))
 
     def compose_response(self):
 
@@ -132,13 +135,13 @@ rules = [Rule(DefaultHandler)]
 
 try:
     from custom_rules import custom_rules
-    rules += custom_rules
+    rules = custom_rules + rules
 except ImportError:
     pass
 
 
 def handle_request(request):
-    logging.info("Got request: %s", request)
+    logging.debug("Got request: %s", request)
     for rule in rules:
         if rule.check(request):
             rule.handler(request)
