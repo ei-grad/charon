@@ -9,7 +9,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 from tornado.httputil import HTTPHeaders
 from tornado import httpserver, httpclient, ioloop
-from tornado.options import define, options
+from tornado.options import define, options, parse_command_line
+
 
 
 define("port", default=8888, help="run on the given port", type=int)
@@ -153,6 +154,7 @@ def handle_request(request):
 
 
 if __name__ == "__main__":
+    parse_command_line()
     http_server = httpserver.HTTPServer(handle_request)
     http_server.listen(options.port)
     ioloop.IOLoop.instance().start()
