@@ -8,8 +8,6 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from tornado.httputil import HTTPHeaders
-HTTPHeaders._normalize_name = lambda x: x
-
 from tornado import httpserver, httpclient, ioloop
 
 
