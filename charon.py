@@ -24,6 +24,11 @@ def httprequest_repr(self):
 
 httpclient.HTTPRequest.__repr__ = httprequest_repr
 
+
+httpclient.AsyncHTTPClient.configure(
+    "tornado.curl_httpclient.CurlAsyncHTTPClient"
+)
+
 fetch = httpclient.AsyncHTTPClient(
     max_clients=1000
 ).fetch
