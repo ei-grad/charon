@@ -34,18 +34,6 @@ fetch = httpclient.AsyncHTTPClient(
 ).fetch
 
 
-ignored_client_headers = set([
-    "Accept-Encoding",
-    "Proxy-Connection",
-])
-
-ignored_headers = set([
-    "Content-Encoding",
-    "Transfer-Encoding",
-    "Vary",
-])
-
-
 def clean_uri(request):
     proxy_uri_prefix = 'http://' + request.host + '/'
     if request.uri.lower().startswith(proxy_uri_prefix.lower()):
@@ -56,6 +44,16 @@ def clean_uri(request):
 
 
 class DefaultHandler:
+
+    ignored_client_headers = set([
+        "Accept-Encoding", # we trust simple_httpclient in this
+        "Proxy-Connection", # it is for us, not for server
+    ])
+
+    ignored_headers = set([
+        "Content-Encoding", # we return content to client without any encoding
+        "Transfer-Encoding", # while not supporting chunked encoding
+    ])
 
     def __init__(self, request):
 
@@ -68,7 +66,7 @@ class DefaultHandler:
         headers = HTTPHeaders()
 
         for i in request.headers.keys():
-            if i not in ignored_client_headers:
+            if i not in self.ignored_client_headers:
                 headers[i] = request.headers[i]
 
         req = httpclient.HTTPRequest(
@@ -102,7 +100,7 @@ class DefaultHandler:
         headers = HTTPHeaders()
 
         for i in self.response.headers:
-            if i not in ignored_headers:
+            if i not in self.ignored_headers:
                 headers[i] = self.response.headers[i]
 
         if self.response.body is not None:
