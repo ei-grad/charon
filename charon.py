@@ -2,7 +2,10 @@
 # coding: utf-8
 
 import re
-import http.client
+try:
+    from http.client import responses
+except ImportError:
+    from httplib import responses
 import logging
 
 from tornado.httputil import HTTPHeaders
@@ -81,8 +84,8 @@ class DefaultHandler:
 
         self.response = response
 
-        if response.code not in http.client.responses:
-            resp = "HTTP/1.1 %d %s" % (500, http.client.responses[500])
+        if response.code not in responses:
+            resp = "HTTP/1.1 %d %s" % (500, responses[500])
             self.request.write(resp.encode('ascii'))
         else:
             self.request.write(self.compose_response())
@@ -104,7 +107,7 @@ class DefaultHandler:
 
         lines.append("HTTP/1.1 %d %s" % (
             self.response.code,
-            http.client.responses[self.response.code]
+            responses[self.response.code]
         ))
 
         for k, v in headers.get_all():
