@@ -8,8 +8,8 @@ except ImportError:
     from httplib import responses
 import logging
 
-from tornado.httputil import HTTPHeaders
 from tornado import httpserver, httpclient, ioloop
+from tornado.httputil import HTTPHeaders
 from tornado.options import define, options, parse_command_line
 
 
@@ -43,16 +43,16 @@ def clean_uri(request):
     return uri.lstrip('/')
 
 
-class DefaultHandler:
+class BaseHandler(object):
 
     ignored_client_headers = set([
-        "Accept-Encoding", # we trust simple_httpclient in this
-        "Proxy-Connection", # it is for us, not for server
+        "Accept-Encoding", # trust simple_httpclient in this
+        "Proxy-Connection", # for proxy, not for web server
     ])
 
     ignored_headers = set([
-        "Content-Encoding", # we return content to client without any encoding
-        "Transfer-Encoding", # while not supporting chunked encoding
+        "Content-Encoding", # return content to client without any encoding
+        "Transfer-Encoding", # have not support for chunked encoding
     ])
 
     def __init__(self, request):
@@ -99,12 +99,7 @@ class DefaultHandler:
 
         headers = HTTPHeaders()
 
-        for i in self.response.headers:
-            if i not in self.ignored_headers:
-                headers[i] = self.response.headers[i]
-
-        if self.response.body is not None:
-            headers['Content-Length'] = str(len(self.response.body))
+        headers = self.process_headers(headers)
 
         lines = []
 
@@ -119,14 +114,38 @@ class DefaultHandler:
         head = "\r\n".join(lines) + "\r\n\r\n"
         head = head.encode("ascii")
 
-        if isinstance(self.response.body, bytes):
+        body = self.process_body(self.response.body)
+
+        if body is not None:
             return head + self.response.body
         else:
-            assert self.response.body is None
             return head
 
+    def process_headers(self, headers):
+        raise NotImplementedError()
 
-class Rule:
+    def process_body(self, body):
+        raise NotImplementedError()
+
+
+class DefaultHandler(BaseHandler):
+
+    def process_headers(self, headers):
+
+        for i in self.response.headers:
+            if i not in self.ignored_headers:
+                headers[i] = self.response.headers[i]
+
+        if self.response.body is not None:
+            headers['Content-Length'] = str(len(self.response.body))
+
+        return headers
+
+    def process_body(self, body):
+        return body
+
+
+class Rule(object):
 
     def __init__(self, handler, host=r'.*', uri=r'.*', methods=['GET', 'POST', 'PUT', 'DELETE']):
         self.handler = handler
@@ -141,7 +160,9 @@ class Rule:
             return False
         return self.uri.match(clean_uri(request)) is not None
 
+
 rules = [Rule(DefaultHandler)]
+
 
 try:
     from custom_rules import custom_rules
