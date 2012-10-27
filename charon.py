@@ -35,7 +35,7 @@ fetch = httpclient.AsyncHTTPClient(
 
 
 def clean_uri(request):
-    proxy_uri_prefix = 'http://' + request.host + '/'
+    proxy_uri_prefix = 'http://' + request.host
     if request.uri.lower().startswith(proxy_uri_prefix.lower()):
         uri = request.uri[len(proxy_uri_prefix):]
     else:
